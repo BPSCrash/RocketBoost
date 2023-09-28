@@ -8,6 +8,7 @@ public class RocketMovement : MonoBehaviour
 {
     [SerializeField] private float _thurstSpeed = 100;
     [SerializeField] private float _rotationSpeed = 100;
+    [SerializeField] private bool _isAlive = true;
     private Rigidbody _rigidbody;
     private ParticlesController _particlesController;
     private SoundController _soundController;
@@ -17,7 +18,7 @@ public class RocketMovement : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
         _particlesController = GetComponent<ParticlesController>();
-        _soundController = GetComponent<SoundController>(); 
+        _soundController = GetComponent<SoundController>();
     }
 
     void Rotate()
@@ -38,7 +39,7 @@ public class RocketMovement : MonoBehaviour
         {
             _rigidbody.AddRelativeForce(Vector3.up * _thurstSpeed * Time.deltaTime);
             EmitParticles();
-        } 
+        }
     }
 
     private void ApplyRotation(float rotationThisFrame)
@@ -68,21 +69,39 @@ public class RocketMovement : MonoBehaviour
             _soundController.ToggleAudio(shouldEmit: true);
 
         }
-        if (Keyboard.current.wKey.wasReleasedThisFrame)
+        if (Keyboard.current.wKey.wasReleasedThisFrame || !_isAlive)
         {
             _soundController.ToggleAudio(shouldEmit: false);
         }
     }
 
+    public void isAlive(bool isAlive)
+    {
+        _isAlive = isAlive;
+    }
+
+    public void StopEverything()
+    {
+        _particlesController.ToggleParticles(shouldEmit: false);
+        _soundController.ToggleAudio(shouldEmit: false);
+    }
+
     void FixedUpdate()
     {
-        Rotate();
-        Boost();
+        if (_isAlive)
+        {
+            Rotate();
+            Boost();
+        }
+
     }
 
     private void Update()
     {
-        EmitParticles();
-        PlaySound();
+        if (_isAlive)
+        {
+            EmitParticles();
+            PlaySound();
+        }
     }
 }
